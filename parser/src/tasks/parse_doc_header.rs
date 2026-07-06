@@ -232,16 +232,13 @@ impl<'arena> Parser<'arena> {
         .attr_defs
         .iter()
         .find(|def| def.loc.start == loc.start)
+        && self.document.meta.get(def.name.as_str()).is_none()
+        && let Err(err) = self
+          .document
+          .meta
+          .insert_header_attr(def.name.as_str(), def.value.clone())
       {
-        if self.document.meta.get(def.name.as_str()).is_none() {
-          if let Err(err) = self
-            .document
-            .meta
-            .insert_header_attr(def.name.as_str(), def.value.clone())
-          {
-            self.err_at(err, def.loc)?;
-          }
-        }
+        self.err_at(err, def.loc)?;
       }
     }
     Ok(())
